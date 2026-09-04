@@ -24,8 +24,9 @@ Both roles can view and update their own profile information.
 A GitHub Actions workflow runs on push and checks that the repository structure is correct (that the `/docs` folder exists and contains the required planning files).
 
 Screenshot of a successful build:
+<img width="1359" height="628" alt="image" src="https://github.com/user-attachments/assets/af876ce2-d8e1-4093-998f-c16605cd1b10" />
 
-`[INSERT SCREENSHOT OF GREEN GITHUB ACTIONS BUILD HERE]`
+
 
 ## Video walkthrough
 
