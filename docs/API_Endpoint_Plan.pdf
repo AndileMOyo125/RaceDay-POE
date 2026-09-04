@@ -1,1 +1,65 @@
-PDF placeholder - Replace with your actual API endpoint plan
+# RaceDay API Endpoint Plan
+
+**Module:** Programming 2B (PROG6212)
+**Student:** [Insert your name and student number here]
+**Part:** 1 – System Planning
+
+This document lists every endpoint the RaceDay API will expose. It covers Authentication, User Profile, Events, Categories, Event Enrolments and Results, as required in Part 1 Section B. This plan will be implemented in Part 2.
+
+---
+
+## Authentication
+
+| HTTP method | Route | Description | Role required | Request body | Expected response |
+|---|---|---|---|---|---|
+| POST | /api/auth/register | Creates a new user account as either an Organiser or a Participant. | None (public) | { fullName, email, password, role } | 201 Created – new user id and role. 400 Bad Request – missing fields or email already in use. |
+| POST | /api/auth/login | Validates a user's email and password and returns a JWT so they can access protected endpoints. | None (public) | { email, password } | 200 OK – JWT token and role. 401 Unauthorized – invalid credentials. |
+
+## User Profile
+
+| HTTP method | Route | Description | Role required | Request body | Expected response |
+|---|---|---|---|---|---|
+| GET | /api/users/me | Returns the profile of the currently logged in user (Organiser or Participant). | Any (logged in) | None | 200 OK – user profile fields. 401 Unauthorized – no/invalid token. |
+| PUT | /api/users/me | Lets the logged in user update their own profile information. | Any (logged in) | { fullName, email } | 200 OK – updated profile. 400 Bad Request – invalid data. |
+
+## Events
+
+| HTTP method | Route | Description | Role required | Request body | Expected response |
+|---|---|---|---|---|---|
+| GET | /api/events | Returns a list of all upcoming events so anyone can browse them. | Any | None | 200 OK – array of events. |
+| GET | /api/events/{id} | Returns the full detail of a single event. | Any | None | 200 OK – event detail. 404 Not Found – event does not exist. |
+| POST | /api/events | Allows an Organiser to create a new event. | Organiser | { eventName, description, eventDate, location, distanceKm, eventType } | 201 Created – the new event. 400 Bad Request – missing/invalid fields. |
+| PUT | /api/events/{id} | Allows an Organiser to update an event they created. | Organiser | { eventName, description, eventDate, location, distanceKm, eventType } | 200 OK – updated event. 403 Forbidden – not the owner. 404 Not Found. |
+| DELETE | /api/events/{id} | Allows an Organiser to delete an event they created. | Organiser | None | 204 No Content – deleted. 403 Forbidden – not the owner. 404 Not Found. |
+
+## Categories
+
+| HTTP method | Route | Description | Role required | Request body | Expected response |
+|---|---|---|---|---|---|
+| GET | /api/events/{eventId}/categories | Returns all categories available for a specific event (e.g. Under 20, Senior, 10km). | Any | None | 200 OK – array of categories. 404 Not Found – event does not exist. |
+| POST | /api/events/{eventId}/categories | Allows an Organiser to add a new age/distance category to their event. | Organiser | { categoryName, minAge, maxAge } | 201 Created – the new category. 400 Bad Request – invalid data. |
+| PUT | /api/categories/{id} | Allows an Organiser to update a category on their own event. | Organiser | { categoryName, minAge, maxAge } | 200 OK – updated category. 403 Forbidden. 404 Not Found. |
+| DELETE | /api/categories/{id} | Allows an Organiser to remove a category from their own event. | Organiser | None | 204 No Content. 403 Forbidden. 404 Not Found. |
+
+## Event Enrolments
+
+| HTTP method | Route | Description | Role required | Request body | Expected response |
+|---|---|---|---|---|---|
+| POST | /api/events/{eventId}/enrolments | Lets a Participant enter an event under a chosen category. Links the participant, the event and the category. | Participant | { categoryId } | 201 Created – enrolment record. 404 Not Found – event/category missing. 409 Conflict – already enrolled. |
+| GET | /api/events/{eventId}/enrolments | Lets an Organiser view everyone who has enrolled in their event. | Organiser | None | 200 OK – array of enrolments. 404 Not Found – event does not exist. |
+| GET | /api/users/me/enrolments | Lets a Participant view their own enrolment/participation history. | Participant | None | 200 OK – array of the participant's enrolments. |
+
+## Results
+
+| HTTP method | Route | Description | Role required | Request body | Expected response |
+|---|---|---|---|---|---|
+| POST | /api/enrolments/{enrolmentId}/results | Lets an Organiser capture a finish time and finishing position for a participant after the event. | Organiser | { finishTime, finishPosition } | 201 Created – result record. 400 Bad Request – invalid data. 404 Not Found – enrolment does not exist. |
+| GET | /api/events/{eventId}/results | Returns the full result list for an event (e.g. a results board). | Any | None | 200 OK – array of results. 404 Not Found – event does not exist. |
+| GET | /api/users/me/results | Lets a Participant view only their own results across all events. | Participant | None | 200 OK – array of the participant's results. |
+
+---
+
+### Notes
+- All endpoints except register, login and the public GET endpoints require a valid JWT in the Authorization header.
+- "Organiser" endpoints check that the logged in user actually owns the event/category/result they are trying to change (via OrganiserID) before allowing the action.
+- This plan matches the ERD in `/docs/ERD_RaceDay.png`. Any deviations found during Part 2 implementation will be explained in the README.
